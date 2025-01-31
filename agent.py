@@ -29,3 +29,18 @@ async def entrypoint(ctx: JobContext):
     assistant_fnc = AssistantFnc()
     assistant = MultimodalAgent(model=model, fnc_ctx=assistant_fnc)
     assistant.start(ctx.room)
+
+    session = model.sessions[0]
+    session.conversation.item.create(
+        llm.ChatMessage{
+            role ="assistant",
+            content=""
+        }
+    )
+
+    session.response.create()
+
+if __name__ == "__main__":
+    cli.run_app(WorkerOption(entrypoint_fnc=entrypoint))
+
+
