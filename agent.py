@@ -2,7 +2,7 @@ from __future__ import annotations
 from livekit.agents import(
     AutoSubscribe,
     JobContext,
-    WorkerOption,
+    WorkerOptions,
     cli,
     llm
 )
@@ -10,6 +10,7 @@ from livekit.agents.multimodal import MultimodalAgent
 from livekit.plugins import openai
 from dotenv import load_dotenv
 from api import AssistantFnc
+from prompts import WELCOME_MESSAGE, INSTRUCTIONS
 import os
 
 load_dotenv()
@@ -20,7 +21,7 @@ async def entrypoint(ctx: JobContext):
     await ctx.wait_for_participant()
 
     model = openai.realtime.RealtimeModel(
-        instruction="",
+        instruction=INSTRUCTIONS,
         voice="shimmer",
         temperature=0.8,
         modalities=["audio", "text"]
@@ -32,15 +33,16 @@ async def entrypoint(ctx: JobContext):
 
     session = model.sessions[0]
     session.conversation.item.create(
-        llm.ChatMessage{
+        llm.ChatMessage(
             role ="assistant",
-            content=""
-        }
+            content=WELCOME_MESSAGE
+        )
+        
     )
 
     session.response.create()
 
 if __name__ == "__main__":
-    cli.run_app(WorkerOption(entrypoint_fnc=entrypoint))
+    cli.run_app(WorkerOptions(entrypoint_fnc=entrypoint))
 
 
