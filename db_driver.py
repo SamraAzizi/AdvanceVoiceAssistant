@@ -21,5 +21,25 @@ class DatabaseDriver:
             conn = sqlite3.connect(self.db_path)
             try:
                 yield conn
-                
+            finally:
+                conn.close()
+
+    
+    def _init_db(self):
+        with self._get_connection() as conn:
+            cursor = conn.cursor()
+
+            #Create cars table
+
+            cursor.execute("""
+
+                CREATE TABLE IF NOT EXISTS cars(
+                           vin TEXT PRIMARY KEY,
+                           make TEXT NOT NULL,
+                           model TEXT NOT NULL,
+                           year INTEGER NOT NULL)
+
+
+        """)
+
         
