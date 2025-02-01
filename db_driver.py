@@ -37,9 +37,21 @@ class DatabaseDriver:
                            vin TEXT PRIMARY KEY,
                            make TEXT NOT NULL,
                            model TEXT NOT NULL,
-                           year INTEGER NOT NULL)
-
-
+                           year INTEGER NOT NULL
+                        )
         """)
+            
+            conn.commit()
+
+    def create_car(self, vin:str, make: str, model: str, year: int) -> Car:
+        with self._get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute(
+                "INSERT INTO CARS (vin, make, model, year) VALUE (?, ?, ?, ?)",
+                (vin, make, model, year)
+            )
+            conn.commit()
+            
+
 
         
