@@ -51,7 +51,15 @@ class DatabaseDriver:
                 (vin, make, model, year)
             )
             conn.commit()
-            
+            return Car(vin=vin, make=make, model=model, year=year)
+        
+    def get_car_by_vin(self, vin: str) -> Optional[Car]:
+        with self._get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("SELECT * FROM cars WHERE vin = ?", (vin,))
+            row
+
+
 
 
         
