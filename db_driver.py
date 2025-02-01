@@ -57,7 +57,16 @@ class DatabaseDriver:
         with self._get_connection() as conn:
             cursor = conn.cursor()
             cursor.execute("SELECT * FROM cars WHERE vin = ?", (vin,))
-            row
+            row = cursor.fetchone()
+            if not row:
+                return None
+            
+            return Car(
+                vin=row[0],
+                make=row[1],
+                model=[2],
+                year=row[3]
+            )
 
 
 
