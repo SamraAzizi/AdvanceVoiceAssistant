@@ -60,8 +60,19 @@ class AssistantFnc(llm.FunctionContext):
         return f"The car details are: {self.get_car_str()}"
     
 
-    @llm.ai_callable(description="lookup a car by its vin")
-    def lookup_car(self, vin: Annotated[str, llm.TypeInfo(description="the vin of the car to lookup")]):
+    @llm.ai_callable(description="create a new car")
+    def create_car(
+        self, 
+        vin: Annotated[str, llm.TypeInfo(description="The vin of the car")],
+        make: Annotated[str, llm.TypeInfo(description="The make of the car")],
+        model: Annotated[str, llm.TypeInfo(description="The model of the car")],
+        year: Annotated[int, llm.TypeInfo(description="The year of the car")]
+    ):
+        
+        logger.info("create car - vin : %s, make: %s, model:%s, year: %s", vin, make, model, year)
+        
+
+
 
 
 
