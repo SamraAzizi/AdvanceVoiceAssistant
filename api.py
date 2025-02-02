@@ -27,6 +27,16 @@ class AssistantFnc(llm.FunctionContext):
             CarDetails.Year: ""
         }
 
+    def get_car_str(self):
+        car_str =""
+        for key, value in self._car_details.items():
+            car_str += f"{key}: {value}\n"
+
+        return car_str
+    
+
+        
+
     @llm.ai_callable(description="lookup a car by its vin")
     def lookup_car(self, vin: Annotated[str, llm.TypeInfo(description="the vin of the car to lookup")]):
         logger.info("lookup car - vin: %s", vin)
@@ -36,12 +46,23 @@ class AssistantFnc(llm.FunctionContext):
             return "Car not found"
         
         self._car_details = {
-            CarDetails.VIN: "",
-            CarDetails.Make: "",
-            CarDetails.Model: "",
-            CarDetails.Year: ""
+            CarDetails.VIN: result.vin,
+            CarDetails.Make: result.make,
+            CarDetails.Model: result.model,
+            CarDetails.Year: result.year
 
         }
+
+        car_str =""
+        for key, value in self._car_details.items():
+            car_str += f"{key}: {value}\n"
+
+        return f"The car details are: {self.get_car_str()}"
+    
+
+    @llm.ai_callable(description="lookup a car by its vin")
+    def lookup_car(self, vin: Annotated[str, llm.TypeInfo(description="the vin of the car to lookup")]):
+
 
 
 
