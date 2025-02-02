@@ -10,7 +10,7 @@ logger.setLevel(logging.INFO)
 
 DB = DatabaseDriver()
 
-class CarDetail(enum.Enum):
+class CarDetails(enum.Enum):
     VIN = "vin"
     Make = "make"
     Model = "model"
@@ -19,3 +19,15 @@ class CarDetail(enum.Enum):
 class AssistantFnc(llm.FunctionContext):
     def __init__(self):
         super().__init__()
+        
+        self._car_details = {
+            CarDetails.VIN: "",
+            CarDetails.Make: "",
+            CarDetails.Model: "",
+            CarDetails.Year: ""
+        }
+
+    @llm.ai_callable(description="lookup a car by its vin")
+    def lookup_car(self, vin: Annotated[str, llm.TypeInfo(description="the vin of the car to lookup")]):
+        
+
