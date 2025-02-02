@@ -60,6 +60,12 @@ class AssistantFnc(llm.FunctionContext):
         return f"The car details are: {self.get_car_str()}"
     
 
+    @llm.ai_callable(description="get the details of the currect car")
+    def get_car_details(self):
+        logger.info("get car details")
+        return f"The car details are: {self.get_car_str()}"
+
+
     @llm.ai_callable(description="create a new car")
     def create_car(
         self, 
@@ -70,6 +76,26 @@ class AssistantFnc(llm.FunctionContext):
     ):
         
         logger.info("create car - vin : %s, make: %s, model:%s, year: %s", vin, make, model, year)
+
+        result = DB.create_car(vin, make, model, year)
+        if result is None:
+            return "Failed to create car"
+        
+        self._car_details = {
+            CarDetails.VIN: result.vin,
+            CarDetails.Make: result.make,
+            CarDetails.Model: result.model,
+            CarDetails.Year: result.year
+
+        }
+        return "car created!"
+    
+
+    def has_car(self):
+        return self._car_details[CarDetails.VIN] != ""
+        
+
+
         
 
 
