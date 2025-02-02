@@ -29,5 +29,19 @@ class AssistantFnc(llm.FunctionContext):
 
     @llm.ai_callable(description="lookup a car by its vin")
     def lookup_car(self, vin: Annotated[str, llm.TypeInfo(description="the vin of the car to lookup")]):
+        logger.info("lookup car - vin: %s", vin)
+
+        result = DB.get_car_by_vin(vin)
+        if result is None:
+            return "Car not found"
         
+        self._car_details = {
+            CarDetails.VIN: "",
+            CarDetails.Make: "",
+            CarDetails.Model: "",
+            CarDetails.Year: ""
+
+        }
+
+
 
