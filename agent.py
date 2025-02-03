@@ -48,17 +48,29 @@ async def entrypoint(ctx: JobContext):
             msg.content = "\n".join("[image]" if isinstance(x, llm.ChatImage)else x for x in msg)
 
         if assistant_fnc.has_car():
-            pass
+            handle_query(msg)
         else:
             pass
 
-    def find_profile(msg:str):
+    def find_profile(msg: llm.ChatMessage):
         session.conversation.item.create(
             llm.ChatMessage(
                 role="system",
                 content=""
             )
         )
+        session.response.create()
+
+
+
+    def handle_query(msg:llm.ChatMessage):
+        session.conversation.item.create(
+            llm.ChatMessage(
+                role="user",
+                content=msg.content
+            )
+        )
+        session.response.create()
 
 if __name__ == "__main__":
     cli.run_app(WorkerOptions(entrypoint_fnc=entrypoint))
