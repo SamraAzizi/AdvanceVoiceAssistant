@@ -10,7 +10,8 @@ from livekit.agents.multimodal import MultimodalAgent
 from livekit.plugins import openai
 from dotenv import load_dotenv
 from api import AssistantFnc
-from prompts import WELCOME_MESSAGE, INSTRUCTIONS
+from prompts import WELCOME_MESSAGE, INSTRUCTIONS, LOOKUP_VIN_MESSAGE
+from
 import os
 
 load_dotenv()
@@ -50,13 +51,13 @@ async def entrypoint(ctx: JobContext):
         if assistant_fnc.has_car():
             handle_query(msg)
         else:
-            pass
+            find_profile(msg)
 
     def find_profile(msg: llm.ChatMessage):
         session.conversation.item.create(
             llm.ChatMessage(
                 role="system",
-                content=""
+                content=LOOKUP_VIN_MESSAGE(msg)
             )
         )
         session.response.create()
