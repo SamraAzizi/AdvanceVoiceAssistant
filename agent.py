@@ -42,6 +42,24 @@ async def entrypoint(ctx: JobContext):
 
     session.response.create()
 
+    @session.on("user_speech_committed")
+    def on_user_speech_committed(msg: llm.ChatMessage):
+        if isinstance(msg.contenct, list):
+            msg.content = "\n".join("[image]" if isinstance(x, llm.ChatImage)else x for x in msg)
+
+        if assistant_fnc.has_car():
+            pass
+        else:
+            pass
+
+    def find_profile(msg:str):
+        session.conversation.item.create(
+            llm.ChatMessage(
+                role="system",
+                content=""
+            )
+        )
+
 if __name__ == "__main__":
     cli.run_app(WorkerOptions(entrypoint_fnc=entrypoint))
 
