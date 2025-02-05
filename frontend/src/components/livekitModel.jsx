@@ -14,8 +14,25 @@ const livekitModal = ({setShowSupport}) =>{
                     <form onSubmit={handleNameSubmit} className="name-form">
                         <h2>Enter Your Name to Connect With Support</h2>
                         <input type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="Your Name" required/>
+                        <button type="submit">Connect</button>
+                        <button type="button" className="cancle-button" onClick={() => setShowSupport(false)}>Cancle</button>
                     </form>
-                ) : <></>}
+                ) : <liveKitRoom
+                serverUrl=""
+                token=""
+                connect={true}
+                video={false}
+                audio={true}
+                onDisconnected={() =>{
+                    setShowSupport(false)
+                    setIsSubmittingName(true)
+
+                }}
+
+                >
+
+                </liveKitRoom>
+                }
 
             </div>
 
