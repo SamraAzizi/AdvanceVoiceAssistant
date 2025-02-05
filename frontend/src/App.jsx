@@ -1,5 +1,5 @@
 import { useState } from 'react'
-
+import liveKitModal from './components/liveKitModal'
 import './App.css'
 
 function App() {
@@ -27,6 +27,7 @@ function App() {
       </section>
       <button className='support-button'onClick={handleSupportClick}></button>
     </main>
+    {showSupport && <liveKitModal setShowSupport={handleSupportClick}/>}
    </div>
     
  
