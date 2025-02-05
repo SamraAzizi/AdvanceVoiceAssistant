@@ -3,12 +3,12 @@ import {liveKitRoom, RoomAudioRender} from "@livekit/Commenta-react"
 import "@livekit/components-styles"
 
 const livekitModal = ({setShowSupport}) =>{
-    const [isSubmittingName, setIsSubmittingName] = useState(false);
+    const [isSubmittingName, setIsSubmittingName] = useState(true);
     const [name, setName] = useState("");
     const handleNameSubmit = () =>{};
 
     return <div className="modal-overlay">
-        <div className="model-content">
+        <div className="modal-content">
             <div className="support-room">
                 {isSubmittingName ? (
                     <form onSubmit={handleNameSubmit} className="name-form">
@@ -30,6 +30,7 @@ const livekitModal = ({setShowSupport}) =>{
                 }}
 
                 >
+                    <RoomAudioRender></RoomAudioRender>
 
                 </liveKitRoom>
                 }
@@ -38,6 +39,9 @@ const livekitModal = ({setShowSupport}) =>{
 
         </div>
 
+
     </div>
 
 }
+
+export default App
