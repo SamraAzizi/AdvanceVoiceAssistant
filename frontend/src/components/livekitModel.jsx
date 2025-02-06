@@ -1,11 +1,13 @@
 import { useState, useCallback } from "react";
 import {liveKitRoom, RoomAudioRender} from "@livekit/Commenta-react"
 import "@livekit/components-styles"
-
+import simpleVoice from "./simpleVoice";
 const livekitModal = ({setShowSupport}) =>{
     const [isSubmittingName, setIsSubmittingName] = useState(true);
     const [name, setName] = useState("");
-    const handleNameSubmit = () =>{};
+    const handleNameSubmit = () =>{
+        setIsSubmittingName(false)
+    };
 
     return <div className="modal-overlay">
         <div className="modal-content">
@@ -18,7 +20,7 @@ const livekitModal = ({setShowSupport}) =>{
                         <button type="button" className="cancle-button" onClick={() => setShowSupport(false)}>Cancle</button>
                     </form>
                 ) : <liveKitRoom
-                serverUrl=""
+                serverUrl={import.meta.env.VITE_LIVEKIT_URL}
                 token=""
                 connect={true}
                 video={false}
@@ -30,7 +32,9 @@ const livekitModal = ({setShowSupport}) =>{
                 }}
 
                 >
-                    <RoomAudioRender></RoomAudioRender>
+                    <RoomAudioRender/>
+                    <simpleVoice/>
+
 
                 </liveKitRoom>
                 }
