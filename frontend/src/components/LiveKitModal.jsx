@@ -29,5 +29,49 @@ const LiveKitModal = ({ setShowSupport }) => {
     }
   };
 
+  return (
+    <div className="modal-overlay">
+      <div className="modal-content">
+        <div className="support-room">
+          {isSubmittingName ? (
+            <form onSubmit={handleNameSubmit} className="name-form">
+              <h2>Enter your name to connect with support</h2>
+              <input
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="Your name"
+                required
+              />
+              <button type="submit">Connect</button>
+              <button
+                type="button"
+                className="cancel-button"
+                onClick={() => setShowSupport(false)}
+              >
+                Cancel
+              </button>
+            </form>
+          ) : token ? (
+            <LiveKitRoom
+              serverUrl={import.meta.env.VITE_LIVEKIT_URL}
+              token={token}
+              connect={true}
+              video={false}
+              audio={true}
+              onDisconnected={() => {
+                setShowSupport(false);
+                setIsSubmittingName(true);
+              }}
+            >
+              <RoomAudioRenderer />
+              <SimpleVoiceAssistant />
+            </LiveKitRoom>
+          ) : null}
+        </div>
+      </div>
+    </div>
+  );
+};
 
 export default LiveKitModal;
