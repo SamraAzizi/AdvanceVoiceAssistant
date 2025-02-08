@@ -1,5 +1,5 @@
 from __future__ import annotations
-from livekit.agents import(
+from livekit.agents import (
     AutoSubscribe,
     JobContext,
     WorkerOptions,
@@ -7,73 +7,70 @@ from livekit.agents import(
     llm
 )
 from livekit.agents.multimodal import MultimodalAgent
-from livekit.plugins import openai
 from dotenv import load_dotenv
 from api import AssistantFnc
 from prompts import WELCOME_MESSAGE, INSTRUCTIONS, LOOKUP_VIN_MESSAGE
-from
+import httpx
 import os
 
 load_dotenv()
 
+# Load Ollama API config from environment variables
+OLLAMA_API_URL = os.getenv("OLLAMA_API_URL", "http://localhost:11434/api/generate")  # Default Ollama local server
+OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "mistral")  # Change to your preferred model
+
+# Ollama Model Wrapper
+class OllamaModel:
+    def __init__(self, instruction, temperature=0.8):
+        self.instruction = instruction
+        self.temperature = temperature
+
+    async def generate(self, prompt):
+        async with httpx.AsyncClient() as client:
+            response = await client.post(
+                OLLAMA_API_URL,
+                json={"model": OLLAMA_MODEL, "prompt": prompt, "temperature": self.temperature},
+            )
+            response_json = response.json()
+            return response_json.get("response", "Error generating response.")
+
+# Initialize Ollama model
+ollama_model = OllamaModel(instruction=INSTRUCTIONS)
+
 async def entrypoint(ctx: JobContext):
     await ctx.connect(auto_subscribe=AutoSubscribe.SUBSCRIBE_ALL)
-
     await ctx.wait_for_participant()
 
-    model = openai.realtime.RealtimeModel(
-        instruction=INSTRUCTIONS,
-        voice="shimmer",
-        temperature=0.8,
-        modalities=["audio", "text"]
-    )
-
     assistant_fnc = AssistantFnc()
-    assistant = MultimodalAgent(model=model, fnc_ctx=assistant_fnc)
-    assistant.start(ctx.room)
+    
+    # Remove the assistant object using `self._session` because Ollama doesn't support it
+    async def assistant_model(prompt):
+        return await ollama_model.generate(prompt)
 
-    session = model.sessions[0]
-    session.conversation.item.create(
-        llm.ChatMessage(
-            role ="assistant",
-            content=WELCOME_MESSAGE
-        )
-        
-    )
+    # Send initial welcome message
+    ctx.session.conversation.item.create(
+    llm.ChatMessage(role="assistant", content=WELCOME_MESSAGE)
+)
+    print(dir(ctx.room))
 
-    session.response.create()
 
-    @session.on("user_speech_committed")
-    def on_user_speech_committed(msg: llm.ChatMessage):
-        if isinstance(msg.contenct, list):
-            msg.content = "\n".join("[image]" if isinstance(x, llm.ChatImage)else x for x in msg)
+
+    @ctx.room.on("user_speech_committed")
+    async def on_user_speech_committed(msg: llm.ChatMessage):
+        if isinstance(msg.content, list):
+            msg.content = "\n".join("[image]" if isinstance(x, llm.ChatImage) else x for x in msg.content)
 
         if assistant_fnc.has_car():
-            handle_query(msg)
+            await handle_query(msg)
         else:
-            find_profile(msg)
+            await find_profile(msg)
 
-    def find_profile(msg: llm.ChatMessage):
-        session.conversation.item.create(
-            llm.ChatMessage(
-                role="system",
-                content=LOOKUP_VIN_MESSAGE(msg)
-            )
-        )
-        session.response.create()
+    async def find_profile(msg: llm.ChatMessage):
+        ctx.room.send_message(LOOKUP_VIN_MESSAGE(msg))
 
-
-
-    def handle_query(msg:llm.ChatMessage):
-        session.conversation.item.create(
-            llm.ChatMessage(
-                role="user",
-                content=msg.content
-            )
-        )
-        session.response.create()
+    async def handle_query(msg: llm.ChatMessage):
+        response_text = await assistant_model(msg.content)  # Directly call Ollama model
+        ctx.room.send_message(response_text)
 
 if __name__ == "__main__":
     cli.run_app(WorkerOptions(entrypoint_fnc=entrypoint))
-
-
