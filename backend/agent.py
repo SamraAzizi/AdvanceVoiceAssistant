@@ -47,14 +47,14 @@ async def entrypoint(ctx: JobContext):
     async def assistant_model(prompt):
         return await ollama_model.generate(prompt)
 
-    # ✅ **Fix: Use send_data() instead of publish_message()**
-    await ctx.room.send_data(
-        topic="chat_message",
-        payload=json.dumps({
+    # ✅ **Fix: Use `ctx.room.local_participant.publish_data()` instead of `send_data()`**
+    await ctx.room.local_participant.publish_data(
+        data=json.dumps({
             "role": "assistant",
             "content": WELCOME_MESSAGE
         }).encode("utf-8"),
-        reliability=2,  # 2 = Reliable delivery
+        kind=2,  # 2 = Reliable transmission
+        topic="chat_message",
     )
 
     @ctx.room.on("user_speech_committed")
@@ -68,24 +68,24 @@ async def entrypoint(ctx: JobContext):
             await find_profile(msg)
 
     async def find_profile(msg: llm.ChatMessage):
-        await ctx.room.send_data(
-            topic="chat_message",
-            payload=json.dumps({
+        await ctx.room.local_participant.publish_data(
+            data=json.dumps({
                 "role": "assistant",
                 "content": LOOKUP_VIN_MESSAGE
             }).encode("utf-8"),
-            reliability=2,
+            kind=2,
+            topic="chat_message",
         )
 
     async def handle_query(msg: llm.ChatMessage):
         response_text = await assistant_model(msg.content)
-        await ctx.room.send_data(
-            topic="chat_message",
-            payload=json.dumps({
+        await ctx.room.local_participant.publish_data(
+            data=json.dumps({
                 "role": "assistant",
                 "content": response_text
             }).encode("utf-8"),
-            reliability=2,
+            kind=2,
+            topic="chat_message",
         )
 
 if __name__ == "__main__":
