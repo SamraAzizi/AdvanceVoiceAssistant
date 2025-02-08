@@ -14,13 +14,12 @@ import httpx
 import os
 import json
 
+
 load_dotenv()
 
-# Load Ollama API config from environment variables
 OLLAMA_API_URL = os.getenv("OLLAMA_API_URL", "http://localhost:11434/api/generate")
 OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "mistral")
 
-# Ollama Model Wrapper
 class OllamaModel:
     def __init__(self, instruction, temperature=0.8):
         self.instruction = instruction
@@ -35,7 +34,6 @@ class OllamaModel:
             response_json = response.json()
             return response_json.get("response", "Error generating response.")
 
-# Initialize Ollama model
 ollama_model = OllamaModel(instruction=INSTRUCTIONS)
 
 async def entrypoint(ctx: JobContext):
@@ -47,14 +45,13 @@ async def entrypoint(ctx: JobContext):
     async def assistant_model(prompt):
         return await ollama_model.generate(prompt)
 
-    # ✅ **Fix: Use `ctx.room.local_participant.publish_data()` instead of `send_data()`**
+    # ✅ **Fix: Corrected `DataPacketKind` import**
     await ctx.room.local_participant.publish_data(
-        data=json.dumps({
+        json.dumps({
             "role": "assistant",
             "content": WELCOME_MESSAGE
         }).encode("utf-8"),
-        kind=2,  # 2 = Reliable transmission
-        topic="chat_message",
+        
     )
 
     @ctx.room.on("user_speech_committed")
@@ -69,23 +66,21 @@ async def entrypoint(ctx: JobContext):
 
     async def find_profile(msg: llm.ChatMessage):
         await ctx.room.local_participant.publish_data(
-            data=json.dumps({
+            json.dumps({
                 "role": "assistant",
                 "content": LOOKUP_VIN_MESSAGE
             }).encode("utf-8"),
-            kind=2,
-            topic="chat_message",
+            DataPacketKind.RELIABLE
         )
 
     async def handle_query(msg: llm.ChatMessage):
         response_text = await assistant_model(msg.content)
         await ctx.room.local_participant.publish_data(
-            data=json.dumps({
+            json.dumps({
                 "role": "assistant",
                 "content": response_text
             }).encode("utf-8"),
-            kind=2,
-            topic="chat_message",
+            DataPacketKind.RELIABLE
         )
 
 if __name__ == "__main__":
