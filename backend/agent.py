@@ -12,12 +12,13 @@ from api import AssistantFnc
 from prompts import WELCOME_MESSAGE, INSTRUCTIONS, LOOKUP_VIN_MESSAGE
 import httpx
 import os
+import json
 
 load_dotenv()
 
 # Load Ollama API config from environment variables
-OLLAMA_API_URL = os.getenv("OLLAMA_API_URL", "http://localhost:11434/api/generate")  # Default Ollama local server
-OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "mistral")  # Change to your preferred model
+OLLAMA_API_URL = os.getenv("OLLAMA_API_URL", "http://localhost:11434/api/generate")
+OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "mistral")
 
 # Ollama Model Wrapper
 class OllamaModel:
@@ -42,18 +43,19 @@ async def entrypoint(ctx: JobContext):
     await ctx.wait_for_participant()
 
     assistant_fnc = AssistantFnc()
-    
-    # Remove the assistant object using `self._session` because Ollama doesn't support it
+
     async def assistant_model(prompt):
         return await ollama_model.generate(prompt)
 
-    # Send initial welcome message
-    ctx.session.conversation.item.create(
-    llm.ChatMessage(role="assistant", content=WELCOME_MESSAGE)
-)
-    print(dir(ctx.room))
-
-
+    # ✅ **Fix: Use send_data() instead of publish_message()**
+    await ctx.room.send_data(
+        topic="chat_message",
+        payload=json.dumps({
+            "role": "assistant",
+            "content": WELCOME_MESSAGE
+        }).encode("utf-8"),
+        reliability=2,  # 2 = Reliable delivery
+    )
 
     @ctx.room.on("user_speech_committed")
     async def on_user_speech_committed(msg: llm.ChatMessage):
@@ -66,11 +68,25 @@ async def entrypoint(ctx: JobContext):
             await find_profile(msg)
 
     async def find_profile(msg: llm.ChatMessage):
-        ctx.room.send_message(LOOKUP_VIN_MESSAGE(msg))
+        await ctx.room.send_data(
+            topic="chat_message",
+            payload=json.dumps({
+                "role": "assistant",
+                "content": LOOKUP_VIN_MESSAGE
+            }).encode("utf-8"),
+            reliability=2,
+        )
 
     async def handle_query(msg: llm.ChatMessage):
-        response_text = await assistant_model(msg.content)  # Directly call Ollama model
-        ctx.room.send_message(response_text)
+        response_text = await assistant_model(msg.content)
+        await ctx.room.send_data(
+            topic="chat_message",
+            payload=json.dumps({
+                "role": "assistant",
+                "content": response_text
+            }).encode("utf-8"),
+            reliability=2,
+        )
 
 if __name__ == "__main__":
     cli.run_app(WorkerOptions(entrypoint_fnc=entrypoint))
