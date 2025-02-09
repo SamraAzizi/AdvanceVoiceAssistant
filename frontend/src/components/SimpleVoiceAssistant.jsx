@@ -6,7 +6,7 @@ import {
     useLocalParticipant,
     useLocalParticipant,
   } from "@livekit/components-react";
-  import { Track } from "livekit-client";
+  import { LocalParticipant, Track } from "livekit-client";
   import { useEffect, useState } from "react";
   import "./SimpleVoiceAssistant.css";
 
@@ -25,7 +25,17 @@ import {
   const SimpleVoiceAssistant = () => {
     const {stat, audioTrack, agentTranscription} = useVoiceAssistant()
     const useLocalParticipant = useLocalParticipant();
+    const {segements: userTranscription} = useTrackTranscription(
+      {
+        publication: LocalParticipant.microphoneTrack,
+        source: Track.Source.Microphone,
+        participant: localParticipant.localParticipant
+      }
+    )
     
+    const {messages, setMessages} = useState([])
+    
+    useEffect(() => [agentTranscription, userTranscription])
   
     return (
       <div className="voice-assistant-container">
