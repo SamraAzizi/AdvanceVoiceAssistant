@@ -4,38 +4,28 @@ import {
     VoiceAssistantControlBar,
     useTrackTranscription,
     useLocalParticipant,
+    useLocalParticipant,
   } from "@livekit/components-react";
   import { Track } from "livekit-client";
   import { useEffect, useState } from "react";
   import "./SimpleVoiceAssistant.css";
-  
-  const Message = ({ type, text }) => {
-    return <div className="message">
+
+  const Message = ({type, text}) =>{
+    <div className="message">
       <strong className={`message-${type}`}>
-        {type === "agent" ? "Agent: " : "You: "}
+        {type === "agent" ? "Agents: ": "You: "}
       </strong>
       <span className="message-text">{text}</span>
-    </div>;
-  };
+    </div>
+
+  }
+  
+
   
   const SimpleVoiceAssistant = () => {
-    const { state, audioTrack, agentTranscriptions } = useVoiceAssistant();
-    const localParticipant = useLocalParticipant();
-    const { segments: userTranscriptions } = useTrackTranscription({
-      publication: localParticipant.microphoneTrack,
-      source: Track.Source.Microphone,
-      participant: localParticipant.localParticipant,
-    });
-  
-    const [messages, setMessages] = useState([]);
-  
-    useEffect(() => {
-      const allMessages = [
-        ...(agentTranscriptions?.map((t) => ({ ...t, type: "agent" })) ?? []),
-        ...(userTranscriptions?.map((t) => ({ ...t, type: "user" })) ?? []),
-      ].sort((a, b) => a.firstReceivedTime - b.firstReceivedTime);
-      setMessages(allMessages);
-    }, [agentTranscriptions, userTranscriptions]);
+    const {stat, audioTrack, agentTranscription} = useVoiceAssistant()
+    const useLocalParticipant = useLocalParticipant();
+    
   
     return (
       <div className="voice-assistant-container">
