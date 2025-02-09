@@ -35,7 +35,14 @@ import {
     
     const {messages, setMessages} = useState([])
     
-    useEffect(() => [agentTranscription, userTranscription])
+    useEffect(() => {
+      const allMessages = [
+        ...(agentTranscription?.map(t => ({...t, type: "agent"}))?? []),
+        ...(userTranscription?.map(t => ({...t, type: "user"}))?? []),
+      ].sort((a , b) => a.firstReceivedTime - b.firstReceivedTime)
+      setMessages(allMessages) 
+    },
+    [agentTranscription, userTranscription])
   
     return (
       <div className="voice-assistant-container">
