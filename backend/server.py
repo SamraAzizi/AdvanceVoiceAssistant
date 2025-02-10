@@ -20,7 +20,14 @@ async def get_token():
         room = await generate_room_name()
 
 
-    token = api.AccessToken(os.)
+    token = api.AccessToken(os.getenv("LIVEKIT_API_KEY"), os.getenv("LIVEKIT_API_SECRET")) \
+        .with_identity(name)\
+        .with_name(name)\
+        .with_grants(api.VideoGrants(
+            room_join=True,
+            room=room
+
+        ))
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5001, debug=True)
