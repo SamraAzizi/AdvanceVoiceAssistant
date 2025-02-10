@@ -8,6 +8,14 @@ import uuid
 
 load_dotenv()
 
+async def generate_room_name():
+    name = "room-" + str(uuid.uuid4())[:8]
+    rooms = await get_rooms()
+    while name in rooms:
+        name = "room-" + str(uuid.uuid4())[:8]
+
+    return name
+
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins" : "*"}})
 
@@ -28,6 +36,8 @@ async def get_token():
             room=room
 
         ))
+
+    return token.to_jwt()
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5001, debug=True)
