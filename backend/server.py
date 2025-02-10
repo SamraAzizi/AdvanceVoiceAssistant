@@ -11,5 +11,16 @@ load_dotenv()
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins" : "*"}})
 
+@app.route("/getToken")
+async def get_token():
+    name = request.args.get("name", "my name")
+    room = request.args.get("room", None)
+
+    if not room:
+        room = await generate_room_name()
+
+
+    token = api.AccessToken(os.)
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5001, debug=True)
