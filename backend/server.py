@@ -16,6 +16,13 @@ async def generate_room_name():
 
     return name
 
+async def get_rooms():
+    api = LiveKitAPI()
+    rooms = await api.room.list_rooms(ListRoomsRequest())
+    await api.close()
+    return [room.name for room in rooms.rooms]
+
+
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins" : "*"}})
 
