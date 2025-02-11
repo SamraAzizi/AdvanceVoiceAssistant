@@ -28,33 +28,7 @@ class AssistantFnc:
             CarDetails.Year: ""
         }
 
-    def get_car_str(self):
-        return "\n".join(f"{key.value}: {value}" for key, value in self._car_details.items())
-
-    async def generate_response(self, prompt):
-        """Generates a response from Ollama based on the given prompt."""
-        async with httpx.AsyncClient() as client:
-            response = await client.post(
-                OLLAMA_API_URL,
-                json={"model": OLLAMA_MODEL, "prompt": prompt, "temperature": 0.8},
-            )
-            response_json = response.json()
-            return response_json.get("response", "Error generating response.")
-
-    async def lookup_car(self, vin: str):
-        """Look up a car by its VIN."""
-        logger.info("lookup car - vin: %s", vin)
-        result = DB.get_car_by_vin(vin)
-        
-        if result is None:
-            return "Car not found"
-
-        self._car_details = {
-            CarDetails.VIN: result.vin,
-            CarDetails.Make: result.make,
-            CarDetails.Model: result.model,
-            CarDetails.Year: result.year
-        }
+ 
 
         return f"The car details are:\n{self.get_car_str()}"
 
